@@ -1,16 +1,14 @@
-# Build
-FROM node:lts-alpine
+# --- Build stage ---
+FROM node:lts-alpine AS build
 WORKDIR /app
+COPY package*.json ./
+RUN npm install
 COPY . .
-RUN npm install && npm run build
+RUN npm run build
 
-# Copy the build to nginx
+# --- Serve stage ---
 FROM nginx:alpine
 WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*
 COPY --from=build /app/dist ./
-
 EXPOSE 80
-
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
